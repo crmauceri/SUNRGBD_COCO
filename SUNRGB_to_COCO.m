@@ -21,13 +21,13 @@ addpath(COCOAPI_MatlabAPI);
 
 % Template for annotation dictionary
 annotate = struct('category_id', [], 'area', [], 'bbox', [], 'id', [], 'image_id', [], ...
-    'mask_name', [], 'segmentation', [], 'iscrowd', false, 'fine_grained', []);
+    'mask_name', [], 'segmentation', [], 'iscrowd', false);
 % Template for categories dictionary
 category = struct('supercategory', [], 'id', [], 'name', [], 'seglist_all_name', [], 'seglist_all_id', []);
 
 % Load SUNRGBD data
-load(SUNRGBDtoolbox_root + '/Metadata/SUNRGBDMeta2DBB_v2.mat');
-load(SUNRGBDtoolbox_root + '/traintestSUNRGBD/allsplit.mat');
+load([SUNRGBDtoolbox_root, '/Metadata/SUNRGBDMeta2DBB_v2.mat']);
+load([SUNRGBDtoolbox_root, '/traintestSUNRGBD/allsplit.mat']);
 
 %% Cleaned category labels
 % Load cleaned labels
@@ -53,6 +53,13 @@ for ii = 1:size(seg_ids,1)
     categories(ii).seglist_all_name = id.original_labels; % Uncleaned label
     categories(ii).seglist_all_id = id.seglistallIndex; % Uncleaned label id
 end
+% Add unknown label for id == 0
+categories = [category categories];
+categories(1).supercategory = 'unknown';
+categories(1).id = 0;
+categories(1).seglist_all_id = 0;
+categories(1).name = 'unknown';
+categories(1).seglist_all_name = 'unknown';
 
 %% Split data into train/val/test based on contents of '/traintestSUNRGBD/allsplit.mat'
 train = find(ismember({SUNRGBDMeta2DBB.sequenceName}, replace(trainvalsplit.train, '/n/fs/sun3d/data/', '')));
@@ -62,8 +69,8 @@ datasets = {test, train, val};
 splits = {'test', 'train', 'val'};
 
 % Process each split 
-n_annotations = 0;
 for set_idx= 1:3
+    annotations_idx = 0;
     
     split_name = splits{set_idx};
     split_data = datasets{set_idx};
@@ -86,8 +93,8 @@ for set_idx= 1:3
     % For each image in the split
     for ii = 1:length(split_data)
         img_idx = split_data(ii);
-        if(mod(n_annotations, 100)==0)
-            fprintf('Processed %d annotations\n', n_annotations);
+        if(mod(annotations_idx, 100)==0)
+            fprintf('Processed %d annotations\n', annotations_idx);
         end
 
         % Load the segmentation file
@@ -112,23 +119,23 @@ for set_idx= 1:3
             % Convert to a COCO mask annotation
             annotate = encode_coco_mask(seg.seglabel==jj, img_idx, sprintf('%d_%d_seg', img_idx, jj), SUNRGBDMeta2DBB);
             if ~isempty(annotate.id)
-                annotations(n_annotations+1) = annotate;
-                n_annotations = n_annotations + 1;
+                annotations(annotations_idx+1) = annotate;
+                annotations_idx = annotations_idx + 1;
             end
         end
     end
     % Remove extra rows from annotations array
-    annotations(n_annotations+1:end) = [];
+    annotations(annotations_idx+1:end) = [];
 
     %% Collect segment labels
     % We do this seperately than the COCO mask annotation convertion
     % because SUNRGBDMeta2DBB and SUNRGBD2Dseg are too big to both be
     % loaded in memory at the same time
     clear SUNRGBDMeta2DBB;
-    load(SUNRGBDtoolbox_root + '/Metadata/SUNRGBD2Dseg.mat');
+    load([SUNRGBDtoolbox_root, '/Metadata/SUNRGBD2Dseg.mat']);
 
     % For each annotation
-    for ii = 1:n_annotations
+    for ii = 1:length(annotations)
         if(mod(ii, 100)==0)
             fprintf('Processed %d annotations\n', ii);
         end
@@ -139,10 +146,16 @@ for set_idx= 1:3
         % If there is more than one category, there is a mismatch
         % between the seg.mat file and the SUNRGBD2Dseg file.
         % This shouldn't happen!
-        assert any(size(category)<1)
+        assert(any(size(category)==1))
         % Look up the category id in the categories table. 
         % This translates the seglabelall id to the cleaned label ids.
-        annotations(ii).category_id = categories(category).id;
+        if category > 0 
+            [~, locb] = ismember(category, [categories.seglist_all_id]);
+            annotations(ii).category_id = categories(locb).id;
+        else
+            % This is an unknown label
+            annotations(ii).category_id = categories(1).id;
+        end
     end
 
     % Save Results
@@ -154,7 +167,7 @@ for set_idx= 1:3
     save(sprintf('%s/instances_%s.mat', savedir, split_name), 'instances');
     
     clear SUNRGBD2Dseg
-    load(SUNRGBDtoolbox_root + '/Metadata/SUNRGBDMeta2DBB_v2.mat');
+    load([SUNRGBDtoolbox_root, '/Metadata/SUNRGBDMeta2DBB_v2.mat']);
 end
 
 end
