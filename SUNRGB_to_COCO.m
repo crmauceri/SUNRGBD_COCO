@@ -17,7 +17,7 @@ function SUNRGB_to_COCO(SUNRGBDtoolbox_root, SUNRGBDdata_root, COCOAPI_MatlabAPI
 
 % Add paths to helper functions
 addpath(genpath(SUNRGBDtoolbox_root));
-addpath(COCOAPI_MatlabAPI);
+addpath([COCOAPI_MatlabAPI '/MatlabAPI']);
 
 % Template for annotation dictionary
 annotate = struct('category_id', [], 'area', [], 'bbox', [], 'id', [], 'image_id', [], ...
