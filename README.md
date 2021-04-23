@@ -20,3 +20,11 @@ Parameters:  SUNRGBDtoolbox_root      root directory of SUNRGBDtoolbox
              savedir                  directory where the coco annoations should be
                                       saved
 ```
+
+## Download processed data
+
+If you just want a copy of the coco annotations, you can download the json files from the following links.
+
+- [instance_train.json](https://drive.google.com/file/d/1YLReQfsbA2BZ0BKebBsrCCiqSbMypXCI/view?usp=sharing)
+- [instance_val.json](https://drive.google.com/file/d/175rAn0JWpy78mVbro4UzjDyd9Psm463O/view?usp=sharing)
+- [instance_test.json](https://drive.google.com/file/d/1igBAX1Z1Nl3dgJ5AtW5mm6fnOBvc1Frk/view?usp=sharing)
