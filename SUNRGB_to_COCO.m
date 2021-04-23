@@ -37,29 +37,40 @@ categories(size(seg_ids, 1)) = category;
 % Index unique clean labels which maintaining order of first 37 labels
 % These 37 are the seg37list prioritized by Song et al. 
 clean_names = unique(lower(seg_ids.clean_label), 'stable');
+clean_names = ['unknown'; clean_names];
 
-% For each original label in seglistall, create an entry in `categories`
-for ii = 1:size(seg_ids,1)
-    id = seg_ids(ii, :);
-    % Find the new label id in the clean_names list
-    [~,Locb] = ismember(lower(id.clean_label), clean_names);
-    categories(ii).id = Locb;
-    if Locb <= 37
-        % If it is a member of the orginal 37, assign it a supercategory name
-        % TODO map supercategories for the fine-grained labels
-        categories(ii).supercategory = clean_names{Locb};
-    end
-    categories(ii).name = id.clean_label;
-    categories(ii).seglist_all_name = id.original_labels; % Uncleaned label
-    categories(ii).seglist_all_id = id.seglistallIndex; % Uncleaned label id
-end
 % Add unknown label for id == 0
-categories = [category categories];
 categories(1).supercategory = 'unknown';
 categories(1).id = 0;
 categories(1).seglist_all_id = 0;
 categories(1).name = 'unknown';
-categories(1).seglist_all_name = 'unknown';
+categories(1).seglist_all_name = {'unknown'};
+
+% For each original label in seglistall, create an entry in `categories`
+ii = 2;
+for jj = 1:size(seg_ids,1)
+    id = seg_ids(jj, :);
+    % Find the new label id in the clean_names list
+    [~,Locb] = ismember(lower(id.clean_label), clean_names);
+    if Locb < ii
+        % This category is has the same clean_name as a category that has
+        % already been processed
+        categories(Locb).seglist_all_name = [categories(Locb).seglist_all_name, id.original_labels{1}]; % Uncleaned label
+        categories(Locb).seglist_all_id = [categories(Locb).seglist_all_id, id.seglistallIndex]; % Uncleaned label id
+    else
+        % First time we add this category to the list
+        categories(ii).id = ii-1;
+        categories(ii).name = id.clean_label{1};
+        categories(ii).seglist_all_name = {id.original_labels{1}}; % Uncleaned label
+        categories(ii).seglist_all_id = id.seglistallIndex; % Uncleaned label id
+        if Locb <= 37
+            % If it is a member of the orginal 37, assign it a supercategory name
+            % TODO map supercategories for the fine-grained labels
+            categories(ii).supercategory = clean_names{Locb};
+        end
+        ii = ii + 1;
+    end
+end
 
 %% Split data into train/val/test based on contents of '/traintestSUNRGBD/allsplit.mat'
 train = find(ismember({SUNRGBDMeta2DBB.sequenceName}, replace(trainvalsplit.train, '/n/fs/sun3d/data/', '')));
@@ -93,11 +104,12 @@ for set_idx= 1:3
     % For each image in the split
     for ii = 1:length(split_data)
         img_idx = split_data(ii);
-        if(mod(annotations_idx, 100)==0)
-            fprintf('Processed %d annotations\n', annotations_idx);
+        if(mod(ii, 100)==0)
+            fprintf('Processed %d images\n', ii);
         end
 
         % Load the segmentation file
+        % The seg.mat file contains instance segmentation
         segpath = sprintf('%s/%s/seg.mat', SUNRGBDdata_root, SUNRGBDMeta2DBB(img_idx).sequenceName);
         seg = load(segpath);
 
@@ -160,7 +172,7 @@ for set_idx= 1:3
 
     % Save Results
     instances = struct('categories',  categories, 'images', images, 'annotations', annotations);
-    fw = fopen(sprintf('%s/instances_%s.json', savedir, split_name), 'w');
+    fw = fopen(sprintf('%s/instances_%s.json', savedir, split_name), 'w', 'n','UTF-8');
     fwrite(fw, jsonencode(instances));
     fclose(fw);
 

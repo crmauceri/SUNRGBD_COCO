@@ -13,6 +13,8 @@ This repo does the following
 - Uses the cocoapi Mask tools to convert the segmentation masks from each SUNRGBD image's seg.mat file into RLE masks. The seg.mat file contains instance segmentation.
 - Manually cleans up the seglistall segmentation labels with some basic spell checking (seglistall.csv)
 
+Demo.ipynb contains a short example of loading the resulting json files with the cocoapi
+
 ## Prerequisites: 
 
 1. Download all the [SUNRGBD](https://rgbd.cs.princeton.edu/) zip files from  including updated annotation files
@@ -73,8 +75,8 @@ categories[{
 	"id": int, 		# 0 is unknown, 1-37 correspond to seg37list, >37 contain rest of seglistall.csv labels
 	"name": str, 		# cleaned name from seglistall.csv
 	"supercategory": str, 	# seg37list category if it exists
-	"seglist_all_name": str,	# Not part of COCO annotation, un-cleaned name from seglistall
-	"seglist_all_id": int	# Not part of COCO annotation, index in seglistall
+	"seglist_all_name": list(str),	# Not part of COCO annotation, all un-cleaned names from seglistall which correspond to this entry
+	"seglist_all_id": list(int)	# Not part of COCO annotation, all index in seglistall which correspond to this entry
 }]
 ```
 
