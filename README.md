@@ -33,13 +33,23 @@ Parameters:  SUNRGBDtoolbox_root      root directory of SUNRGBDtoolbox
                                       saved
 ```
 
+If you have encoding errors when loading the resulting json files with coco, you can use this python snippet to re-encode the files with utf8
+
+```
+with open('instances_val.json', 'r', encoding='iso-8859-1') as f:
+    jsonstr = f.read()
+
+with open('instances_val.json', 'w') as f:
+    f.write(jsonstr)
+```
+
 ## Download processed data
 
 If you just want a copy of the coco annotations, you can download the json files from the following links.
 
-- [instance_train.json](https://drive.google.com/file/d/1YLReQfsbA2BZ0BKebBsrCCiqSbMypXCI/view?usp=sharing)
-- [instance_val.json](https://drive.google.com/file/d/175rAn0JWpy78mVbro4UzjDyd9Psm463O/view?usp=sharing)
-- [instance_test.json](https://drive.google.com/file/d/1igBAX1Z1Nl3dgJ5AtW5mm6fnOBvc1Frk/view?usp=sharing)
+- [instances_train.json](https://drive.google.com/file/d/1YLReQfsbA2BZ0BKebBsrCCiqSbMypXCI/view?usp=sharing)
+- [instances_val.json](https://drive.google.com/file/d/175rAn0JWpy78mVbro4UzjDyd9Psm463O/view?usp=sharing)
+- [instances_test.json](https://drive.google.com/file/d/1igBAX1Z1Nl3dgJ5AtW5mm6fnOBvc1Frk/view?usp=sharing)
 
 ## Details of resulting annotation 
 
