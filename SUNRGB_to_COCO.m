@@ -33,11 +33,7 @@ load([SUNRGBDtoolbox_root, '/traintestSUNRGBD/allsplit.mat']);
 % Load cleaned labels
 seg_ids = readtable('seglistall.csv');
 categories(size(seg_ids, 1)) = category;
-
-% Index unique clean labels which maintaining order of first 37 labels
-% These 37 are the seg37list prioritized by Song et al. 
-clean_names = unique(lower(seg_ids.clean_label), 'stable');
-clean_names = ['unknown'; clean_names];
+category_index = zeros(size(seg_ids, 1), 2); % Index for seglistall -> categories
 
 % Add unknown label for id == 0
 categories(1).supercategory = 'unknown';
@@ -51,12 +47,13 @@ ii = 2;
 for jj = 1:size(seg_ids,1)
     id = seg_ids(jj, :);
     % Find the new label id in the clean_names list
-    [~,Locb] = ismember(lower(id.clean_label), clean_names);
-    if Locb < ii
+    [~,Locb] = ismember(lower(id.clean_label), {categories(1:ii-1).name});
+    if Locb > 0
         % This category is has the same clean_name as a category that has
         % already been processed
         categories(Locb).seglist_all_name = [categories(Locb).seglist_all_name, id.original_labels{1}]; % Uncleaned label
         categories(Locb).seglist_all_id = [categories(Locb).seglist_all_id, id.seglistallIndex]; % Uncleaned label id
+        c = Locb;
     else
         % First time we add this category to the list
         categories(ii).id = ii-1;
@@ -66,12 +63,17 @@ for jj = 1:size(seg_ids,1)
         if Locb <= 37
             % If it is a member of the orginal 37, assign it a supercategory name
             % TODO map supercategories for the fine-grained labels
-            categories(ii).supercategory = clean_names{Locb};
+            categories(ii).supercategory = id.clean_label{1};
         end
+        c = ii;
         ii = ii + 1;
     end
+    
+    % Make an index for seglistall -> categories
+    category_index(jj, 1) = id.seglistallIndex;
+    category_index(jj, 2) = c;
 end
-categories = categories(1:ii);
+categories = categories(1:ii-1);
 
 %% Split data into train/val/test based on contents of '/traintestSUNRGBD/allsplit.mat'
 train = find(ismember({SUNRGBDMeta2DBB.sequenceName}, replace(trainvalsplit.train, '/n/fs/sun3d/data/', '')));
@@ -163,8 +165,8 @@ for set_idx= 1:3
         % Look up the category id in the categories table. 
         % This translates the seglabelall id to the cleaned label ids.
         if category > 0 
-            [~, locb] = ismember(category, [categories.seglist_all_id]);
-            annotations(ii).category_id = categories(locb).id;
+            [~, locb] = ismember(category, category_index(:, 1));
+            annotations(ii).category_id = categories(category_index(locb, 2)).id;
         else
             % This is an unknown label
             annotations(ii).category_id = categories(1).id;
