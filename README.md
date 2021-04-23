@@ -98,4 +98,11 @@ annotations[{
 
 ### (Optional) Choose your own clean labels
 
-You can further clean the category labels by updating seglistall.csv
+I started the cleaning process by loading the csv file in Excel and using the spell correction tools. 
+I also changed some frequent and obvious synonyms (bookcase vs bookshelf), standardized spacing (bookcase vs book case), and removed some adjectives (white book).
+
+There are still many incorrect labels. You can further clean the category labels by updating seglistall.csv
+
+WARNING: Be cautious about labels that you are unfamiliar with! "teapoi" is a three legged table, not a misspelling of "teapot". "airpot" is a kind of coffee thermos. I did not look at the source images while doing my round of spelling corrections, so I may have made some false assumptions, but I tried to be very conservative. 
+
+One other idea that I had, but haven't gotten around to, is using WordNet or some other resource to hierarchically cluster labels into super-categories. 
