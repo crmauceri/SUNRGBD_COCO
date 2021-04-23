@@ -71,6 +71,7 @@ for jj = 1:size(seg_ids,1)
         ii = ii + 1;
     end
 end
+categories = categories(1:ii);
 
 %% Split data into train/val/test based on contents of '/traintestSUNRGBD/allsplit.mat'
 train = find(ismember({SUNRGBDMeta2DBB.sequenceName}, replace(trainvalsplit.train, '/n/fs/sun3d/data/', '')));
