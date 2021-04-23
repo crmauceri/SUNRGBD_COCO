@@ -95,3 +95,7 @@ annotations[{
 	"mask_name": 			# Not part of COCO annotation, SUNRGBDMeta2DBB(image_id).sequenceName
 }]
 ```
+
+### (Optional) Choose your own clean labels
+
+You can further clean the category labels by updating seglistall.csv
