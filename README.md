@@ -45,6 +45,12 @@ with open('instances_val.json', 'w') as f:
     f.write(jsonstr)
 ```
 
+There is also a python script to concatenate the json files if you want a single json for all splits. 
+
+```
+python concatenate_json.py
+```
+
 ## Download processed data
 
 If you just want a copy of the coco annotations, you can download the json files from the following links.
@@ -59,12 +65,14 @@ Here are the details for each json field and where they differ from the coco ann
 
 ```
 image[{
-	"id": int, 		# Same as original index in SUNRGBD2Dseg.mat or SUNRGBDMeta2DBB_v2.mat
+	"id": int, 		            # Same as original index in SUNRGBD2Dseg.mat or SUNRGBDMeta2DBB_v2.mat
 	"width": int,
 	"height": int,
-	"file_name": str, 	# SUNRGBDMeta2DBB(id).sequenceName + /image/ + SUNRGBDMeta2DBB(id).rgbname
+	"file_name": str, 	        # SUNRGBDMeta2DBB(id).sequenceName + /image/ + SUNRGBDMeta2DBB(id).rgbname
 	"depth_file_name": str, 	# Not part of COCO annotation
-				# SUNRGBDMeta2DBB(id).sequenceName + /depth/ +  SUNRGBDMeta2DBB(id).depthname
+				                # SUNRGBDMeta2DBB(id).sequenceName + /depth/ +  SUNRGBDMeta2DBB(id).depthname
+    "split": str                # Not part of COCO annotation
+                                # ['train', 'test', 'val'] The splits defined for the SUNRGBD dataset in 'SUNRGBDtoolbox/traintestSUNRGBD/allsplit.mat'
 }]
 ```
 
@@ -82,10 +90,11 @@ categories[{
 
 Some category ids occur multiple times as they correspond to the same clean `name` but different `seglist_all_id`s.
 
-
 ```
 annotations[{
-	"id": int, 			# "<image_id>_<seg_index>" where seg_index is the index in seg.mat
+	"id": int, 			# There are two kinds of annotation, bounding boxes and instance segementation. These are distinguished by two different id templates:
+                        #       "<image_id>_<bbox_index>"  where bbox_index is the index in SUNRGBDMeta2DBB.groundtruth2DBB
+                        #       "<image_id>_<seg_index>_<instance_id>_seg" where seg_index is the index in seglabels and instance_id is the index in seginstances in seg.mat
 	"image_id": int,
 	"category_id": int, 		# Explained in more detail above
 	"segmentation": RLE,
