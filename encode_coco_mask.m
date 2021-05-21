@@ -1,4 +1,4 @@
-function [annotate]=encode_coco_mask(mask, ii_idx, ann_id, SUNRGBDMeta2DBB)
+function [annotate]=encode_coco_mask(mask, ii_idx, ann_id, classname, SUNRGBDMeta2DBB)
     annotate = struct('category_id', [], 'area', [], 'bbox', [], 'id', [], 'image_id', [], ...
         'mask_name', [], 'segmentation', [], 'iscrowd', false);
     
@@ -12,6 +12,7 @@ function [annotate]=encode_coco_mask(mask, ii_idx, ann_id, SUNRGBDMeta2DBB)
             annotate.mask_name = SUNRGBDMeta2DBB(ii_idx).sequenceName;
             annotate.segmentation =  MaskApi.encode(uint8(mask));
             annotate.id = ann_id;
+            annotate.classname = classname;
         end
     end
 end
