@@ -90,7 +90,7 @@ test = find(startsWith(replace({SUNRGBDMeta2DBB.sequenceName}, '/', ''), ...
 val = find(startsWith(replace({SUNRGBDMeta2DBB.sequenceName}, '/', ''), ...
     replace(replace(trainvalsplit.val, '/n/fs/sun3d/data/', ''), '/', '')));
 datasets = {test, train, val};
-splits = {'test', 'train', 'val'};
+splits = {'test', 'train', 'val'}; %'test', 'train', 'val',
 
 % Process each split
 for set_idx= 1:3
@@ -192,7 +192,7 @@ for set_idx= 1:3
     
     % For each annotation
     for ii = 1:length(annotations)
-        if(mod(ii, 100)==0)
+        if(mod(ii, 1000)==0)
             fprintf('Processed %d annotations\n', ii);
         end
         
